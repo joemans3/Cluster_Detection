@@ -1,0 +1,22 @@
+[project]
+name = "cluster-detection"
+version = "0.1.0"
+description = "Cluster Detection in Microscopy Images"
+readme = "README.md"
+requires-python = "==3.12.0"
+dependencies = [
+  "numpy>=1.21.2",
+  "matplotlib>=3.6.0",
+  "scipy>=1.7.1",
+  "scikit-image>=0.18.3",
+  "Pillow==9.4.0",
+  "mkdocs==1.6.0",
+  "lmfit>=1.0.2"
+]
+
+# [project.scripts]
+# hello = "cluster_detection:hello"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
