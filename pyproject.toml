@@ -1,9 +1,9 @@
 [project]
 name = "cluster-detection"
-version = "0.1.0"
+version = "0.1.1"
 description = "Cluster Detection in Microscopy Images"
 readme = "README.md"
-requires-python = "==3.12.0"
+requires-python = ">=3.10"
 dependencies = [
   "numpy>=1.21.2",
   "matplotlib>=3.6.0",
