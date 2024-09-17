@@ -1,6 +1,6 @@
 [project]
 name = "cluster-detection"
-version = "0.1.2"
+version = "0.1.3"
 description = "Cluster Detection in Microscopy Images"
 readme = "README.md"
 requires-python = ">=3.10"
