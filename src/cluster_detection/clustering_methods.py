@@ -1,8 +1,8 @@
 import numpy as np
 from scipy.spatial import ConvexHull
 from sklearn.cluster import DBSCAN, HDBSCAN
-from cluster_detection.utils import reshape_col2d
-from cluster_detection.blob_detection import blob_detection
+from .utils import reshape_col2d, create_all_points, make_circle
+from .blob_detection import blob_detection
 import matplotlib.pyplot as plt
 
 
@@ -135,7 +135,7 @@ def perfrom_DBSCAN_Cluster(localizations, D, minP, show=False):
     print("Cluster centers (x,y): \n", cluster_centers)
     print("Cluster radii: \n", cluster_radii)
     print("Number of localizations per cluster: \n", loc_per_cluster)
-    return cluster_labels, cluster_centers, cluster_radii, loc_per_cluster
+    return (cluster_labels, cluster_centers, cluster_radii, loc_per_cluster)
 
 
 # function for performing hdbscan clustering in a similar way to the DBSCAN clustering
@@ -205,4 +205,153 @@ def perform_HDBSCAN_Cluster(localizations, min_cluster_size, min_samples, show=F
     print("Cluster radii: \n", cluster_radii)
     print("Number of localizations per cluster: \n", loc_per_cluster)
 
-    return cluster_labels, cluster_centers, cluster_radii, loc_per_cluster
+    return (cluster_labels, cluster_centers, cluster_radii, loc_per_cluster)
+
+
+def scale_utility(img_map, threshold):
+    b = blob_detection(
+        path=img_map,
+        median=False,
+        threshold=threshold,
+        min_sigma=1 / np.sqrt(2),
+        max_sigma=10 / np.sqrt(2),
+        num_sigma=30,
+        overlap=0.5,
+        logscale=False,
+        verbose=True,
+    )
+    b._update_fitting_parameters(
+        kwargs={
+            "mask_size": 5,
+            "plot_fit": False,
+            "fitting_image": "Original",
+            "radius_func": None,
+            "sigma_range": 2,
+            "centroid_range": 2,
+        }
+    )
+    c = b.detection(type="bp")
+    return c
+
+
+def perform_DBSCAN(points_per_frame_dict, D, minPts, convert=False):
+    if convert:
+        all_points = create_all_points(points_per_frame_dict)
+    else:
+        all_points = points_per_frame_dict
+    db = DBSCAN(eps=D, min_samples=minPts).fit(all_points)
+    labels = db.labels_
+    return labels
+
+
+def DBSCAN_TP_FP_center_scale_error(
+    ID_dict, points_per_frame, D, minPts, convert=False, threshold=1.0
+):
+    # convert the points_perf_frame dict to a list of points
+    if convert:
+        all_points = create_all_points(points_per_frame)
+    else:
+        all_points = points_per_frame
+    # perform DBSCAN
+    labels = perform_DBSCAN(all_points, D, minPts, convert=False)
+    # number of clusters
+    num_clusters = len(np.unique(labels)) - 1
+
+    cluster_scales = []
+    cluster_centers = []
+    for cluster in np.unique(labels):
+        if cluster != -1:
+            circle_made = make_circle(points_per_frame[labels == cluster])
+            cluster_scales.append(circle_made[2])
+            cluster_centers.append(circle_made[0:2])
+    cluster_scales = np.array(cluster_scales)
+    cluster_centers = np.array(cluster_centers)
+    # lets get the true positives and errors
+    # find the true centers and scales
+    true_centers = np.array(ID_dict["initial_centers"])
+    true_scale = np.array(ID_dict["initial_scale"])
+    true_center_TP_center_error = np.ones(len(true_centers)) * np.nan
+    true_center_TP_scale_error = np.ones(len(true_centers)) * np.nan
+
+    if num_clusters > 0:
+        for l in range(len(true_centers)):
+            for m in range(len(cluster_centers)):
+                if np.linalg.norm(true_centers[l] - cluster_centers[m]) < threshold:
+                    if true_center_TP_center_error[l] > np.linalg.norm(
+                        true_centers[l] - cluster_centers[m]
+                    ) or np.isnan(true_center_TP_center_error[l]):
+                        true_center_TP_center_error[l] = np.linalg.norm(
+                            true_centers[l] - cluster_centers[m]
+                        )
+                        true_center_TP_scale_error[l] = (
+                            np.abs(true_scale[l] - cluster_scales[m]) / true_scale[l]
+                        )
+    false_positives = len(cluster_centers) - len(
+        true_center_TP_center_error[~np.isnan(true_center_TP_center_error)]
+    )
+    # get the true positives
+    true_positive_num = len(
+        true_center_TP_center_error[~np.isnan(true_center_TP_center_error)]
+    )
+    return (
+        true_positive_num,
+        false_positives,
+        true_center_TP_center_error,
+        true_center_TP_scale_error,
+    )
+
+
+# define a utility function to detect the true positives and the error in the centers and scale
+
+
+def true_positive_and_error(true_clusters, found_clusters, center_threshold=0.5):
+    """true clusters is the initial_dict, the found is the scale space output from the blob detection"""
+    # get the true centers and scale
+    true_centers = true_clusters["initial_centers"]
+    true_scale = true_clusters["initial_scale"]
+    # get the found centers and scale
+    found_centers = np.array(
+        [found_clusters["Fitted"][i][:2] for i in range(len(found_clusters["Fitted"]))]
+    )
+
+    found_scale = np.array(
+        [
+            np.mean([found_clusters["Fitted"][i][2], found_clusters["Fitted"][i][3]])
+            for i in range(len(found_clusters["Fitted"]))
+        ]
+    )
+    # get the true positives
+    true_center_TP_center_error = np.ones(len(true_centers)) * np.nan
+    true_center_TP_scale_error = np.ones(len(true_centers)) * np.nan
+    for i in range(len(true_centers)):
+        for j in range(len(found_centers)):
+            if (
+                np.linalg.norm(true_centers[i] - found_centers[j][::-1])
+                < center_threshold
+            ):
+                if true_center_TP_center_error[i] > np.linalg.norm(
+                    true_centers[i] - found_centers[j][::-1]
+                ) or np.isnan(true_center_TP_center_error[i]):
+                    true_center_TP_center_error[i] = np.linalg.norm(
+                        true_centers[i] - found_centers[j][::-1]
+                    )
+                    true_center_TP_scale_error[i] = (
+                        np.abs(true_scale[i] - found_scale[j]) / true_scale[i]
+                    )
+
+    # get the false positives
+    # this is just the total number of found centers minus the true positives (len of the true_center_TP_center_error without the nans)
+    false_positives = len(found_centers) - len(
+        true_center_TP_center_error[~np.isnan(true_center_TP_center_error)]
+    )
+    # get the true positives
+    true_positive_num = len(
+        true_center_TP_center_error[~np.isnan(true_center_TP_center_error)]
+    )
+
+    return (
+        true_positive_num,
+        false_positives,
+        true_center_TP_center_error,
+        true_center_TP_scale_error,
+    )

@@ -16,9 +16,10 @@ dependencies = [
   "scikit-learn>=1.5.2",
 ]
 
-# [project.scripts]
-# hello = "cluster_detection:hello"
-
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
+
+[tool.pyright]
+venvPath = "."
+venv = ".venv"

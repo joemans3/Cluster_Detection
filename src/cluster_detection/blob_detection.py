@@ -19,7 +19,7 @@ from scipy.ndimage import filters
 from skimage.feature import blob
 from skimage.util import dtype
 
-from cluster_detection.utils import rescale_range, read_file
+from .utils import rescale_range, read_file
 
 
 # global vars for fitting functions
