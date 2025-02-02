@@ -2,25 +2,24 @@
 Author: Baljyot Singh Parmar
 """
 
-import numpy as np
-import matplotlib.image as mpimg
 import math
 import random
+
+import matplotlib.image as mpimg
+import numpy as np
 
 
 def read_file(file_loc):
     """
-    Parameters
-        ----------
-
+    Parameters:
+    -----------
     file_loc : str
-                path to the file
+        path to the file
 
-    Returns
-        -------
-
+    Returns:
+    --------
     Array-like
-                the array is 2D array of the pixel locations
+        the array is 2D array of the pixel locations
     """
     img = mpimg.imread(file_loc)
     return img
@@ -61,7 +60,29 @@ def reshape_col2d(arr, permutations):
 
 
 def rescale_range(x, min_x, max_x, a, b):
-    """https://stats.stackexchange.com/questions/281162/scale-a-number-between-a-range"""
+    """Rescale a number x from the range [min_x, max_x] to the range [a, b]
+
+    Parameters:
+    -----------
+    x : float
+        The number to be rescaled
+    min_x : float
+        The minimum value of x
+    max_x : float
+        The maximum value of x
+    a : float
+        The minimum value of the new range
+    b : float
+        The maximum value of the new range
+
+    Returns:
+    --------
+    float
+        The rescaled number
+
+    Notes:
+    ------
+        Ref: https://stats.stackexchange.com/questions/281162/scale-a-number-between-a-range"""
     if min_x >= max_x:
         raise ValueError("min_x={} is not less than max_x={}".format(min_x, max_x))
     if a >= b:
@@ -73,12 +94,55 @@ def rescale_range(x, min_x, max_x, a, b):
 
 
 def create_all_points(points_per_frame_dict):
+    """Create all points from the points_per_frame_dict
+    Input format for the points_per_frame_dict:
+    {
+        frame_number: [
+            [x1, y1, z1],
+            [x2, y2, z2],
+            ...
+        ],
+        ...
+    }
+
+    Parameters:
+    -----------
+    points_per_frame_dict : dict
+        A dictionary containing the points per frame
+
+    Returns:
+    --------
+    numpy array
+        A 2D numpy array containing all the points in the cell
+        Format: [[x1, y1, z1], [x2, y2, z2], ...]
+    """
     all_points = []
     for frame in points_per_frame_dict.keys():
         # only take the x,y coordinates
         if len(points_per_frame_dict[frame]) > 0:
             all_points.extend(np.array(points_per_frame_dict[frame])[:, 0:])
     return np.array(all_points)
+
+
+# take a list and return it as is
+def identity(x):
+    """identity function, returns the input
+
+    Parameters:
+    -----------
+    x : any
+        input to be returned
+
+    Returns:
+    --------
+    x : any
+        input
+
+    Uses:
+    -----
+    identity(x) = x
+    """
+    return x
 
 
 #

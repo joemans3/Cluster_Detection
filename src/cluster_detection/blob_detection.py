@@ -19,8 +19,7 @@ from scipy.ndimage import filters
 from skimage.feature import blob
 from skimage.util import dtype
 
-from .utils import rescale_range, read_file
-
+from .utils import identity, read_file, rescale_range
 
 # global vars for fitting functions
 FWHM_FACTOR = 2.0 * (np.log(2.0 + np.sqrt(3)))
@@ -535,7 +534,7 @@ class blob_detection:
                 size=self.fitting_parameters.get("mask_size", 5),
                 sigma_indx=sigma_indx_pruned,
             )
-        else:
+        elif self.fitting_parameters.get("fitting_image", "Original") == "Laplacian":
             fit_objects = self._create_mask(
                 image_cube,
                 blobs_pruned,
@@ -773,27 +772,6 @@ class blob_detection:
         # #initial.add("sigma_y",value=20.)
         # initial.add("background",value=0.015)
         return initial
-
-
-# take a list and return it as is
-def identity(x):
-    """identity function, returns the input
-
-    Parameters:
-    -----------
-    x : any
-        input to be returned
-
-    Returns:
-    --------
-    x : any
-        input
-
-    Uses:
-    -----
-    identity(x) = x
-    """
-    return x
 
 
 # isotropic residual gaussain
