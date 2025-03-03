@@ -4,8 +4,6 @@ A Python library providing advanced clustering and blob detection capabilities f
 
 ## Key Features
 
-- DBSCAN clustering for point cloud analysis
-- HDBSCAN clustering for density-based spatial clustering
 - Scale-space blob detection with customizable parameters
 - Automated parameter optimization for both DBSCAN and Scale-space detection
 - Ground truth comparison and metric evaluation
