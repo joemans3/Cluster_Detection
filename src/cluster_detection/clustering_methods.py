@@ -9,7 +9,7 @@ from scipy.spatial import ConvexHull
 from sklearn.cluster import DBSCAN, HDBSCAN
 
 from .blob_detection import blob_detection
-from .utils import create_all_points, make_circle, reshape_col2d
+from .utils import create_all_points, identity, make_circle, reshape_col2d
 
 
 @dataclass
@@ -279,6 +279,8 @@ def scale_space_plus_blob_detection(
     blobs["Scale"] = reshape_col2d(blobs["Scale"], [1, 0, 2])
 
     if show:
+        if not fitting_parameters["radius_func"]:
+            fitting_parameters["radius_func"] = identity
         _visualize_blobs(img, blobs, fitting_parameters)
 
     return blobs

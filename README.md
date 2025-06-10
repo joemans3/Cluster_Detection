@@ -12,7 +12,7 @@ A Python library providing advanced clustering and blob detection capabilities f
 ## Installation
 
 ```bash
-pip install cluster-detection
+pip install cluster_detection
 ```
 
 
@@ -21,7 +21,7 @@ pip install cluster-detection
 ### DBSCAN Clustering
 
 ```python
-from cluster-detection import perform_DBSCAN_Cluster
+from cluster_detection import perform_DBSCAN_Cluster
 results = perform_DBSCAN_Cluster(localizations, D, minP, show=False)
 ```
 
@@ -43,7 +43,7 @@ Performs DBSCAN (Density-Based Spatial Clustering of Applications with Noise) cl
 ### HDBSCAN Clustering
 
 ```python
-from cluster-detection import perform_HDBSCAN_Cluster
+from cluster_detection import perform_HDBSCAN_Cluster
 results = perform_HDBSCAN_Cluster(localizations, min_cluster_size, min_samples, show=False)
 ```
 
@@ -65,7 +65,7 @@ Performs HDBSCAN (Hierarchical Density-Based Spatial Clustering of Applications 
 ### Scale-Space Blob Detection
 
 ```python
-from cluster-detection import scale_space_plus_blob_detection
+from cluster_detection import scale_space_plus_blob_detection
 results = scale_space_plus_blob_detection(img, blob_parameters, fitting_parameters, show=False)
 ```
 
@@ -113,7 +113,7 @@ The library includes optimization capabilities for both DBSCAN and Scale-space b
 ### Available Metrics
 
 ```python
-from cluster-detection import MetricType
+from cluster_detection import MetricType
 class MetricType(Enum):
     TRUE_POSITIVES = "true_positives"
     FALSE_POSITIVES = "false_positives"
@@ -134,7 +134,7 @@ ground_truth = {
 ### DBSCAN Optimization
 
 ```python
-from cluster-detection import DBSCANOptimizer
+from cluster_detection import DBSCANOptimizer
 optimizer = DBSCANOptimizer(metrics=[MetricType.TRUE_POSITIVES, MetricType.FALSE_POSITIVES]) # only consider these two metrics when optimizing for DBSCAN parameters.
 result = optimizer.optimize(
     data=points,
@@ -149,7 +149,7 @@ result = optimizer.optimize(
 #### Optimizing with a given ground truth value
 
 ```python
-from cluster-detection import ScaleSpaceOptimizerTruth
+from cluster_detection import ScaleSpaceOptimizerTruth
 optimizer = ScaleSpaceOptimizerTruth(metrics=[MetricType.TRUE_POSITIVES, MetricType.FALSE_POSITIVES])
 result = optimizer.optimize(
     blob_params=blob_params,
@@ -164,7 +164,7 @@ This will find the first instance (at the threshold value) at which the first cl
 If the input image a uniform localization control, this threshold value represents the smallest value to consider a cluster a true cluster. Only applies if the total intensity (# localizations) in the control image and applied image is conserved.
 
 ```python
-from cluster-detection import ScaleSpaceOptimizerExplore
+from cluster_detection import ScaleSpaceOptimizerExplore
 optimizer = ScaleSpaceOptimizerExplore(metrics=[MetricType.TRUE_POSITIVES, MetricType.FALSE_POSITIVES])
 result = optimizer.optimize(
     blob_params=blob_params,
@@ -205,7 +205,7 @@ OptimizationResult(
 
 ```python
 import numpy as np
-from cluster-detection import (
+from cluster_detection import (
     perform_DBSCAN_Cluster,
     perform_HDBSCAN_Cluster,
     scale_space_plus_blob_detection,
